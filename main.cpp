@@ -47,22 +47,30 @@ void ue_thread()
 void channel_thread()
 {
     std::uint64_t _slots = 0;    
-    Cell cell1(&nr_sub6, _slots);
+    
 
-    for(_slots = 0; _slots < MAX_SLOTS; _slots++) {
-
-        if(_slots % 5 == 4) {
-            cell1.schedule_SSBs(&nr_sub6, _slots);
-        }
+    for(_slots = 0; _slots < MAX_SLOTS; _slots++) 
+    {
         slot_barrier.arrive_and_wait();
+        /*Delete everything from schedule_ that is in the past */
+        nr_sub6.deschedule_past_slots(_slots);
+        
     }
 }
 
 void cell_thread()
 {
     LOG << "Cell thread\n";
+    auto _slots = 0;
+    Cell cell1(&nr_sub6, _slots);
 
-    for(auto _slots = 0; _slots < MAX_SLOTS; _slots++) {
+    for( _slots = 0; _slots < MAX_SLOTS; _slots++) 
+    {
+
+        if(_slots % 5 == 4) 
+        {
+            cell1.schedule_SSBs(&nr_sub6, _slots);
+        }
 
         slot_barrier.arrive_and_wait();
     }

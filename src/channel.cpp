@@ -21,6 +21,8 @@ void Channel::schedule(
     Payload *payload,
     std::uint64_t cur_slot
 ) {
+    std::lock_guard<std::mutex> lock(schedule_mutex_);
+
     std::uint64_t slot = resource->first; 
     std::uint32_t frequency_resource = resource->second; 
     if(slot <= cur_slot) {
@@ -42,6 +44,8 @@ bool Channel::listen(std::uint64_t slot,
     Payload *received,
     std::uint64_t cur_slot
 ) {
+    std::lock_guard<std::mutex> lock(schedule_mutex_);
+
     if(cur_slot != slot) {
         LOG << "Error: Cannot listen to a future slot or Past slot. Current slot: " << cur_slot << ", Attempted slot: " << slot << std::endl;
         return false;
@@ -54,7 +58,6 @@ bool Channel::listen(std::uint64_t slot,
         {
             const auto& scheduled_item = schedule_.top();
             *received = scheduled_item.second;
-            schedule_.pop();
             LOG << "Received message of type " << static_cast<int>(received->type)
                 << " at slot " << slot
                 << " on frequency resource " << frequency_resource
@@ -70,4 +73,18 @@ bool Channel::listen(std::uint64_t slot,
     }
     
     return false;
+}
+void Channel::deschedule_past_slots(std::uint64_t cur_slot) 
+{
+    std::lock_guard<std::mutex> lock(schedule_mutex_);
+
+    while (!schedule_.empty() && 
+        schedule_.top().first.first <= cur_slot) 
+    {
+        LOG << "Descheduling message of type " << static_cast<int>(schedule_.top().second.type)
+             << " at slot " << schedule_.top().first.first
+             << " on frequency resource " << schedule_.top().first.second
+             << std::endl;
+        schedule_.pop();
+    }
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <mutex>
 #include <queue>
 #include <vector>
 
@@ -28,12 +29,16 @@ public:
         std::uint32_t frequency_resource
     ) const;
 
+    void deschedule_past_slots(std::uint64_t cur_slot);
+
 private:
     std::priority_queue<
         ScheduledItem,
         std::vector<ScheduledItem>,
         SlotComparator
     > schedule_;
+
+    std::mutex schedule_mutex_;
 
     
 };
