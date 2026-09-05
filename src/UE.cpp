@@ -26,6 +26,9 @@ const char* to_string(UeState state)
 
         case UeState::CONNECTED:
             return "CONNECTED";
+
+        case UeState::SSB_DETECTED:
+            return "SSB_DETECTED";
     }
 
     return "UNKNOWN";

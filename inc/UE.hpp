@@ -3,34 +3,9 @@
 #include <cstdint>
 #include <queue>
 #include <utility>
+#include "RadioTypes.hpp"
 
-struct Payload {
-    MessageType type;
-    std::uint32_t frequency_resource;
 
-    // SSB-specific for now
-    std::uint16_t pci;
-    std::uint8_t ssb_index;
-};
-
-using ScheduledItem = std::pair<std::uint64_t, Payload>;
-
-struct SlotComparator {
-    bool operator()(
-        const ScheduledItem& lhs,
-        const ScheduledItem& rhs
-    ) const
-    {
-        return lhs.first > rhs.first;
-    }
-};
-enum class MessageType {
-    SSB,
-    PRACH,
-    RAR,
-    MSG3,
-    MSG4
-};
 
 enum class UeState {
     POWERED_OFF,
