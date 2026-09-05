@@ -1,14 +1,14 @@
 #include "channel.hpp"
-#include <iostream>
+#include "logging.hpp"
 
 using namespace std;
 
 Channel::Channel() {
-    cout << "Channel created" << std::endl;
+    LOG << "Channel created" << std::endl;
 }
 
 Channel::~Channel() {
-    cout << "Channel destroyed" << std::endl;
+    LOG << "Channel destroyed" << std::endl;
 }
 
 bool Channel::supported_frequency_resource(std::uint32_t frequency_resource) const {
@@ -16,33 +16,34 @@ bool Channel::supported_frequency_resource(std::uint32_t frequency_resource) con
         return frequency_resource < 100;
     }
 
-Channel::schedule(
-    std::uint64_t slot, 
-    std::uint32_t frequency_resource, 
-    const Payload& payload, 
-    uint64_t cur_slot
+void Channel::schedule(
+    Resource *resource,
+    Payload *payload,
+    std::uint64_t cur_slot
 ) {
+    std::uint64_t slot = resource->first; 
+    std::uint32_t frequency_resource = resource->second; 
     if(slot <= cur_slot) {
-        cout << "Error: Cannot schedule a message in the past. Current slot: " << cur_slot << ", Attempted slot: " << slot << std::endl;
+        LOG << "Error: Cannot schedule a message in the past. Current slot: " << cur_slot << ", Attempted slot: " << slot << std::endl;
         return;
     }
     schedule_.push({
     {slot, frequency_resource},
-    payload
+    *payload
 });
-    cout << "Scheduled message of type " << static_cast<int>(payload.type)
+    LOG << "Scheduled message of type " << static_cast<int>(payload->type)
          << " at slot " << slot
          << " on frequency resource " << frequency_resource
          << std::endl;
 }
 
-Channel::listen(std::uint64_t slot, 
+bool Channel::listen(std::uint64_t slot,
     std::uint32_t frequency_resource, 
-    Payload& received,
-    uint64_t cur_slot
+    Payload *received,
+    std::uint64_t cur_slot
 ) {
     if(cur_slot != slot) {
-        cout << "Error: Cannot listen to a future slot or Past slot. Current slot: " << cur_slot << ", Attempted slot: " << slot << std::endl;
+        LOG << "Error: Cannot listen to a future slot or Past slot. Current slot: " << cur_slot << ", Attempted slot: " << slot << std::endl;
         return false;
     }
 
@@ -52,9 +53,9 @@ Channel::listen(std::uint64_t slot,
         schedule_.top().first.second == frequency_resource)
         {
             const auto& scheduled_item = schedule_.top();
-            received = scheduled_item.second;
+            *received = scheduled_item.second;
             schedule_.pop();
-            cout << "Received message of type " << static_cast<int>(received.type)
+            LOG << "Received message of type " << static_cast<int>(received->type)
                 << " at slot " << slot
                 << " on frequency resource " << frequency_resource
                 << std::endl;
@@ -63,7 +64,7 @@ Channel::listen(std::uint64_t slot,
     }
     else 
     {
-        cout << "No message scheduled for slot " << slot
+        LOG << "No message scheduled for slot " << slot
              << " on frequency resource " << frequency_resource
              << std::endl;
     }

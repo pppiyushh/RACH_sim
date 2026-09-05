@@ -1,7 +1,10 @@
 #pragma once
 
 #include <cstdint>
+#include <cstdlib>
 #include <utility>
+
+#define SSB_FREQ 0 // Example frequency resource for SSB
 
 enum class MessageType {
     SSB,
@@ -27,10 +30,19 @@ using ScheduledItem =
 
 struct SlotComparator {
     bool operator()(
-        const Resource& lhs,
-        const Resource& rhs
+        const ScheduledItem& lhs,
+        const ScheduledItem& rhs
     ) const
     {
-        return lhs.first > rhs.first;
+        return lhs.first.first > rhs.first.first;
     }
 };
+
+inline void get_future_resource(Resource *r)
+{
+    const std::uint64_t slot_offset = std::rand() % 5;
+    const std::uint32_t frequency_resource = std::rand() % 100;
+
+    r->first += slot_offset;
+    r->second = frequency_resource;
+}

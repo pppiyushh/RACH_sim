@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "RadioTypes.hpp"
-#include "UE.hpp"   // temporary if Payload currently lives there
 
 class Channel {
 public:
@@ -13,21 +12,21 @@ public:
     ~Channel();
 
     void schedule(
-        std::uint64_t slot,
-        std::uint32_t frequency_resource,
-        const Payload& payload
+        Resource *resource,
+        Payload *payload,
+        std::uint64_t cur_slot
     );
 
     bool listen(
         std::uint64_t slot,
         std::uint32_t frequency_resource,
-        Payload& received
+        Payload *received,
+        uint64_t cur_slot
     );
 
-    bool supported_frequency_resource(std::uint32_t frequency_resource) const {
-        // For demonstration, let's assume the channel supports frequency resources in the range [0, 99]
-        return frequency_resource < 100;
-    }
+    bool supported_frequency_resource(
+        std::uint32_t frequency_resource
+    ) const;
 
 private:
     std::priority_queue<

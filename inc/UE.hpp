@@ -4,6 +4,7 @@
 #include <queue>
 #include <utility>
 #include "RadioTypes.hpp"
+#include "channel.hpp"
 
 
 
@@ -30,8 +31,7 @@ public:
 
     void enqueue_rx(std::uint64_t slot, std::uint32_t frequency_resource);
 
-private:
-    void listen(std::uint64_t slot);
+    bool listen(Channel *c, Resource *resource, Payload *received, std::uint64_t cur_slot);
 
     /*
       UE stores which slots to transmit on 
